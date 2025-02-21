@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Jield\Search\ValueObject;
 
 use Doctrine\Common\Collections\Criteria;
-use Laminas\Json;
+use Doctrine\Common\Collections\Order;
 use function array_key_exists;
 use function base64_decode;
 use function base64_encode;
@@ -15,43 +15,48 @@ use function strtoupper;
 final class SearchFormResult
 {
     public function __construct(
-        private string       $order = '',
-        private string       $direction = Criteria::ASC,
-        private ?string      $query = null,
-        private array        $filter = [],
-        private array        $facet = [],
-        private DateInterval $dateInterval = new DateInterval(),
-    )
-    {
-    }
+        private string $order = "",
+        private string $direction = Order::Ascending->value,
+        private ?string $query = null,
+        private array $filter = [],
+        private array $facet = [],
+        private DateInterval $dateInterval = new DateInterval()
+    ) {}
 
     public static function fromArray(array $params): SearchFormResult
     {
         return new self(
-            order: $params['order'] ?? 'default',
-            direction: $params['direction'] ?? Criteria::ASC,
-            query: $params['query'] ?? null,
-            filter: $params['filter'] ?? [],
-            facet: $params['facet'] ?? [],
-            dateInterval: DateInterval::fromValue(value: $params['dateInterval'] ?? ''),
+            order: $params["order"] ?? "default",
+            direction: $params["direction"] ?? Order::Ascending->value,
+            query: null === $params["query"]
+                ? null
+                : trim(string: $params["query"]),
+            filter: $params["filter"] ?? [],
+            facet: $params["facet"] ?? [],
+            dateInterval: DateInterval::fromValue(
+                value: $params["dateInterval"] ?? ""
+            )
         );
     }
 
-    public function updateFromEncodedFilter(string $encodedFilter): SearchFormResult
-    {
+    public function updateFromEncodedFilter(
+        string $encodedFilter
+    ): SearchFormResult {
         try {
-            $filter = (array)Json\Json::decode(
-                encodedValue: base64_decode(string: $encodedFilter),
-                objectDecodeType: Json\Json::TYPE_ARRAY
+            $filter = (array) json_decode(
+                base64_decode(string: $encodedFilter),
+                true
             );
-        } catch (Json\Exception\RuntimeException) {
+        } catch (\Exception) {
             $filter = [];
         }
 
-        $this->filter       = (array)($filter['filter'] ?? []);
-        $this->facet        = (array)($filter['facet'] ?? []);
-        $this->dateInterval = DateInterval::fromValue(value: $filter['dateInterval'] ?? '');
-        $this->query        = $filter['query'] ?? null;
+        $this->filter = (array) ($filter["filter"] ?? []);
+        $this->facet = (array) ($filter["facet"] ?? []);
+        $this->dateInterval = DateInterval::fromValue(
+            value: $filter["dateInterval"] ?? ""
+        );
+        $this->query = $filter["query"] ?? null;
 
         return $this;
     }
@@ -70,18 +75,18 @@ final class SearchFormResult
 
     public function getHash(): string
     {
-        return base64_encode(string: Json\Json::encode(valueToEncode: $this->toArray()));
+        return base64_encode(string: json_encode(value: $this->toArray()));
     }
 
     public function toArray(): array
     {
         return [
-            'order'        => $this->order,
-            'direction'    => $this->direction,
-            'query'        => $this->query,
-            'filter'       => $this->filter,
-            'facet'        => $this->facet,
-            'dateInterval' => $this->dateInterval->toValue(),
+            "order" => $this->order,
+            "direction" => $this->direction,
+            "query" => $this->query,
+            "filter" => $this->filter,
+            "facet" => $this->facet,
+            "dateInterval" => $this->dateInterval->toValue(),
         ];
     }
 
@@ -95,8 +100,11 @@ final class SearchFormResult
         return $this->filter[$key] ?? $default;
     }
 
-    public function setFilterByKey(string $key, mixed $value, bool $force = false): SearchFormResult
-    {
+    public function setFilterByKey(
+        string $key,
+        mixed $value,
+        bool $force = false
+    ): SearchFormResult {
         //Only set the value when we force it or when it does not exist
         if ($force || !array_key_exists(key: $key, array: $this->filter)) {
             $this->filter[$key] = $value;
@@ -105,11 +113,14 @@ final class SearchFormResult
         return $this;
     }
 
-    public function setFacetByKey(string $key, mixed $value, bool $force = false): SearchFormResult
-    {
+    public function setFacetByKey(
+        string $key,
+        mixed $value,
+        bool $force = false
+    ): SearchFormResult {
         //Only set the value when we force it or when it does not exist
         if ($force || !array_key_exists(key: $key, array: $this->facet)) {
-            $this->facet[$key]['values'] = $value;
+            $this->facet[$key]["values"] = $value;
         }
 
         return $this;
@@ -117,10 +128,10 @@ final class SearchFormResult
 
     public function hasFilterByKey(string $key): bool
     {
-        return array_key_exists(
-                key: $key,
-                array: $this->filter
-            ) && '' !== $this->filter[$key] && null !== $this->filter[$key] && [] !== $this->filter[$key];
+        return array_key_exists(key: $key, array: $this->filter) &&
+            "" !== $this->filter[$key] &&
+            null !== $this->filter[$key] &&
+            [] !== $this->filter[$key];
     }
 
     public function hasQuery(): bool
@@ -130,7 +141,7 @@ final class SearchFormResult
 
     public function hasDefaultOrder(): bool
     {
-        return $this->order === 'default';
+        return $this->order === "default";
     }
 
     public function getOrder(): string
@@ -165,7 +176,13 @@ final class SearchFormResult
     {
         $direction = strtoupper(string: $this->direction);
 
-        if (!in_array(needle: $direction, haystack: [Criteria::ASC, Criteria::DESC], strict: true)) {
+        if (
+            !in_array(
+                needle: $direction,
+                haystack: [Criteria::ASC, Criteria::DESC],
+                strict: true
+            )
+        ) {
             return Criteria::DESC;
         }
 
@@ -197,8 +214,9 @@ final class SearchFormResult
         return $this->dateInterval;
     }
 
-    public function setDateInterval(DateInterval $dateInterval): SearchFormResult
-    {
+    public function setDateInterval(
+        DateInterval $dateInterval
+    ): SearchFormResult {
         $this->dateInterval = $dateInterval;
         return $this;
     }

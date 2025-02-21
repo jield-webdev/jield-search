@@ -10,7 +10,6 @@ use Doctrine\ORM\EntityManager;
 use Jield\Search\Document\DocumentHelperInterface;
 use Jield\Search\Entity\HasSearchInterface;
 use Jield\Search\ValueObject\FacetField;
-use Laminas\Json\Json;
 use Laminas\Translator\TranslatorInterface;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
@@ -29,9 +28,9 @@ use function sprintf;
 
 abstract class AbstractSearchService implements SearchServiceInterface
 {
-    final public const DATE_SOLR = 'Y-m-d\TH:i:s\Z';
-    final public const QUERY_TERM_BOOST = 30;
-    public const SOLR_CONNECTION = 'default';
+    final public const string DATE_SOLR = 'Y-m-d\TH:i:s\Z';
+    final public const int QUERY_TERM_BOOST = 30;
+    public const string SOLR_CONNECTION = 'default';
 
     protected ?Client $solrClient = null;
 
@@ -349,7 +348,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
             $responseBody = $e->getBody();
 
             if (!empty($responseBody)) {
-                $response = Json::decode(encodedValue: $responseBody);
+                $response = json_decode(json: $responseBody);
                 if (isset($response->responseHeader)) {
                     $output->writeln(
                         messages: sprintf(
@@ -623,7 +622,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
             }
         } catch (HttpException $e) {
             $responseBody = $e->getBody();
-            $response     = Json::decode(encodedValue: $responseBody);
+            $response     = json_decode(json: $responseBody);
 
             $output->writeln(
                 messages: sprintf(
