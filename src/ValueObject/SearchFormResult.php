@@ -15,22 +15,24 @@ use function strtoupper;
 final class SearchFormResult
 {
     public function __construct(
-        private string $order = "",
-        private string $direction = Order::Ascending->value,
-        private ?string $query = null,
-        private array $filter = [],
-        private array $facet = [],
+        private string       $order = "",
+        private string       $direction = Order::Ascending->value,
+        private ?string      $query = null,
+        private array        $filter = [],
+        private array        $facet = [],
         private DateInterval $dateInterval = new DateInterval()
-    ) {}
+    )
+    {
+    }
 
     public static function fromArray(array $params): SearchFormResult
     {
+        $query = (null === ($params["query"] ?? null)) ? null : trim(string: $params["query"]);
+
         return new self(
             order: $params["order"] ?? "default",
             direction: $params["direction"] ?? Order::Ascending->value,
-            query: null === $params["query"]
-                ? null
-                : trim(string: $params["query"]),
+            query: $query,
             filter: $params["filter"] ?? [],
             facet: $params["facet"] ?? [],
             dateInterval: DateInterval::fromValue(
@@ -41,9 +43,10 @@ final class SearchFormResult
 
     public function updateFromEncodedFilter(
         string $encodedFilter
-    ): SearchFormResult {
+    ): SearchFormResult
+    {
         try {
-            $filter = (array) json_decode(
+            $filter = (array)json_decode(
                 base64_decode(string: $encodedFilter),
                 true
             );
@@ -51,12 +54,12 @@ final class SearchFormResult
             $filter = [];
         }
 
-        $this->filter = (array) ($filter["filter"] ?? []);
-        $this->facet = (array) ($filter["facet"] ?? []);
+        $this->filter       = (array)($filter["filter"] ?? []);
+        $this->facet        = (array)($filter["facet"] ?? []);
         $this->dateInterval = DateInterval::fromValue(
             value: $filter["dateInterval"] ?? ""
         );
-        $this->query = $filter["query"] ?? null;
+        $this->query        = $filter["query"] ?? null;
 
         return $this;
     }
@@ -81,11 +84,11 @@ final class SearchFormResult
     public function toArray(): array
     {
         return [
-            "order" => $this->order,
-            "direction" => $this->direction,
-            "query" => $this->query,
-            "filter" => $this->filter,
-            "facet" => $this->facet,
+            "order"        => $this->order,
+            "direction"    => $this->direction,
+            "query"        => $this->query,
+            "filter"       => $this->filter,
+            "facet"        => $this->facet,
             "dateInterval" => $this->dateInterval->toValue(),
         ];
     }
@@ -102,9 +105,10 @@ final class SearchFormResult
 
     public function setFilterByKey(
         string $key,
-        mixed $value,
-        bool $force = false
-    ): SearchFormResult {
+        mixed  $value,
+        bool   $force = false
+    ): SearchFormResult
+    {
         //Only set the value when we force it or when it does not exist
         if ($force || !array_key_exists(key: $key, array: $this->filter)) {
             $this->filter[$key] = $value;
@@ -115,9 +119,10 @@ final class SearchFormResult
 
     public function setFacetByKey(
         string $key,
-        mixed $value,
-        bool $force = false
-    ): SearchFormResult {
+        mixed  $value,
+        bool   $force = false
+    ): SearchFormResult
+    {
         //Only set the value when we force it or when it does not exist
         if ($force || !array_key_exists(key: $key, array: $this->facet)) {
             $this->facet[$key]["values"] = $value;
@@ -216,7 +221,8 @@ final class SearchFormResult
 
     public function setDateInterval(
         DateInterval $dateInterval
-    ): SearchFormResult {
+    ): SearchFormResult
+    {
         $this->dateInterval = $dateInterval;
         return $this;
     }
