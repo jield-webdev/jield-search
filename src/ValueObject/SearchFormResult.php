@@ -27,7 +27,10 @@ final class SearchFormResult
 
     public static function fromArray(array $params): SearchFormResult
     {
-        $query = (null === ($params["query"] ?? null)) ? null : trim(string: $params["query"]);
+        $query
+            = null === ($params["query"] ?? null)
+            ? null
+            : trim(string: $params["query"]);
 
         return new self(
             order: $params["order"] ?? "default",
