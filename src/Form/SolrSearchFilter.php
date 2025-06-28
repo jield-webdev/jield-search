@@ -94,7 +94,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         $this->add(elementOrFieldset: $facetFieldset);
     }
 
-    private function getFacetByFacetField(string $fieldName): FacetResultInterface
+    private function getFacetByFacetField(string $fieldName)
     {
         $facetSet = $this->searchService->getResultSet()->getFacetSet();
 

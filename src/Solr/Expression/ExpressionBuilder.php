@@ -485,7 +485,7 @@ class ExpressionBuilder
      *
      * @param array|string|null $parameters
      */
-    #[Pure] public function func(string $function, array|string $parameters = null): ExpressionInterface
+    #[Pure] public function func(string $function, null|array|string $parameters = null): ExpressionInterface
     {
         return new FunctionExpression(function: $function, parameters: $parameters);
     }
