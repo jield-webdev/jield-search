@@ -611,7 +611,7 @@ class ExpressionBuilder
     public function searchQuery(string $searchQuery): ?ExpressionInterface
     {
         if ($this->ignore(expr: $searchQuery)) {
-            return null;
+            return new Expression(expr: '*');
         }
 
         $searchQuery = trim(string: $searchQuery);
