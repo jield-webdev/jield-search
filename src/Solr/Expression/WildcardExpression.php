@@ -29,6 +29,10 @@ class WildcardExpression extends Expression implements Stringable
 
     public function __toString(): string
     {
+        if ($this->wildcard === '*') {
+            return '*';
+        }
+
         if ($this->prefix instanceof PhraseExpression) {
             $prefix = substr(string: $this->prefix, offset: 0, length: -1);
             $phrasePrefix = true;
