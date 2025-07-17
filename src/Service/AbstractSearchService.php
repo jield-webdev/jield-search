@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Jield\Search\Service;
 
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Jield\Search\Document\DocumentHelperInterface;
 use Jield\Search\Entity\HasSearchInterface;
@@ -311,33 +310,32 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
     private function findAllIdsFromDatabase(HasSearchInterface $entity, array $criteria): array
     {
-        $results = $this->entityManager->getRepository($entity::class)->findBy(
-            criteria: $criteria,
-            orderBy:  ['id' => Criteria::ASC]
-        );
-
-        $databaseIds = [];
-        /** @var HasSearchInterface $singleResult */
-        foreach ($results as $singleResult) {
-            $databaseIds[] = $singleResult->getId();
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $queryBuilder->select('e.id');
+        $queryBuilder->from(from: $entity::class, alias: 'e');
+        if (!empty($criteria)) {
+            foreach ($criteria as $key => $value) {
+                $queryBuilder->andWhere(sprintf('e.%s = :%s', $key, $key));
+                $queryBuilder->setParameter(':' . $key, value: $value);
+            }
         }
-
-        return $databaseIds;
+        return array_map(static fn(array $result) => $result['id'], $queryBuilder->getQuery()->getArrayResult());
     }
 
     protected function findCount(string $entity, array $criteria): int
     {
-        return $this->entityManager->getRepository($entity)->count(criteria: $criteria);
-    }
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $queryBuilder->select('COUNT(e.id)');
+        $queryBuilder->from(from: $entity, alias: 'e');
 
-    protected function findSliced(string $entity, int $limit, int $offset, array $criteria = []): array
-    {
-        return $this->entityManager->getRepository($entity)->findBy(
-            criteria: $criteria,
-            orderBy:  [],
-            limit:    $limit,
-            offset:   $offset
-        );
+        if (!empty($criteria)) {
+            foreach ($criteria as $key => $value) {
+                $queryBuilder->andWhere(sprintf('e.%s = :%s', $key, $key));
+                $queryBuilder->setParameter(':' . $key, value: $value);
+            }
+        }
+
+        return $queryBuilder->getQuery()->getSingleScalarResult();
     }
 
     protected function updateIndex(OutputInterface $output, \Solarium\QueryType\Update\Query\Query $update): void
