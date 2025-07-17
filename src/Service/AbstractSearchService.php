@@ -257,7 +257,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
             return;
         }
 
-        $searchIndexIds = $this->findAllIdsFromSearchIndex(entity: $entity);
+        $searchIndexIds = $this->findAllIdsFromSearchIndex();
 
         $toBeDeletedItemsInSearchIndex = array_diff($searchIndexIds, $databaseIds);
 
@@ -287,7 +287,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
         $this->getSolrClient()->update(query: $update);
     }
 
-    protected function findAllIdsFromSearchIndex(?HasSearchInterface $entity = null): array
+    protected function findAllIdsFromSearchIndex(): array
     {
         //Get all ids from the index
         $query = $this->getSolrClient()->createSelect();
@@ -319,7 +319,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
                 $queryBuilder->setParameter(':' . $key, value: $value);
             }
         }
-        return array_map(static fn(array $result) => $result['id'], $queryBuilder->getQuery()->getArrayResult());
+        return array_map(fn(array $result) => $result['id'], $queryBuilder->getQuery()->getArrayResult());
     }
 
     protected function findCount(string $entity, array $criteria): int
@@ -336,6 +336,16 @@ abstract class AbstractSearchService implements SearchServiceInterface
         }
 
         return $queryBuilder->getQuery()->getSingleScalarResult();
+    }
+
+    protected function findSliced(string $entity, int $limit, int $offset, array $criteria = []): array
+    {
+        return $this->entityManager->getRepository($entity)->findBy(
+            criteria: $criteria,
+            orderBy:  [],
+            limit:    $limit,
+            offset:   $offset
+        );
     }
 
     protected function updateIndex(OutputInterface $output, \Solarium\QueryType\Update\Query\Query $update): void
@@ -390,7 +400,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
             return;
         }
 
-        $searchIndexIds = $this->findAllIdsFromSearchIndex(entity: $entity);
+        $searchIndexIds = $this->findAllIdsFromSearchIndex();
 
         $toBeAddedItemsInSearchIndex = array_diff($databaseIds, $searchIndexIds);
 
