@@ -9,19 +9,12 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'search:sync-index', description: 'Sync the search engine index')]
 final class SyncIndex extends Command
 {
-    /** @var string */
-    protected static $defaultName = 'search:sync-index';
-
     public function __construct(private readonly ConsoleService $consoleService)
     {
-        parent::__construct(name: self::$defaultName);
-    }
-
-    protected function configure(): void
-    {
-        $this->setName(name: self::$defaultName);
+        parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

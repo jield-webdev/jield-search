@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Jield\Search\Service;
 
 use InvalidArgumentException;
-use Psr\Container\ContainerInterface;
 use Jield\Search\Entity\HasSearchInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
 
@@ -32,8 +32,12 @@ class ConsoleService
         }
     }
 
-    public function resetIndex(OutputInterface $output, string $index, bool $clearIndex = false): void
-    {
+    public function resetIndex(
+        OutputInterface $output,
+        string $index,
+        bool $clearIndex = false,
+        bool $shallow = false
+    ): void {
         if ($index === 'all') {
             foreach ($this->services as $service) {
                 /** @var AbstractSearchService $serviceInstance */
@@ -41,15 +45,16 @@ class ConsoleService
                 /** @var HasSearchInterface $entity */
                 $entity = new $service['entity']();
 
-                $limit = $service['limit'] ?? 50;
+                $limit    = $service['limit'] ?? 50;
                 $criteria = $service['criteria'] ?? [];
 
                 $serviceInstance->updateCollection(
-                    output: $output,
-                    entity: $entity,
+                    output:     $output,
+                    entity:     $entity,
                     clearIndex: $clearIndex,
-                    limit: $limit,
-                    criteria: $criteria
+                    shallow:    $shallow,
+                    limit:      $limit,
+                    criteria:   $criteria
                 );
             }
             return;
@@ -69,15 +74,16 @@ class ConsoleService
         /** @var HasSearchInterface $entity */
         $entity = new $this->services[$index]['entity']();
 
-        $limit = $this->services[$index]['limit'] ?? 50;
+        $limit    = $this->services[$index]['limit'] ?? 50;
         $criteria = $this->services[$index]['criteria'] ?? [];
 
         $serviceInstance->updateCollection(
-            output: $output,
-            entity: $entity,
+            output:     $output,
+            entity:     $entity,
             clearIndex: $clearIndex,
-            limit: $limit,
-            criteria: $criteria
+            shallow:    $shallow,
+            limit:      $limit,
+            criteria:   $criteria
         );
     }
 
@@ -92,8 +98,8 @@ class ConsoleService
             $criteria = $service['criteria'] ?? [];
 
             $serviceInstance->syncIndex(
-                output: $output,
-                entity: $entity,
+                output:   $output,
+                entity:   $entity,
                 criteria: $criteria
             );
         }
@@ -108,8 +114,8 @@ class ConsoleService
             $entity = new $service['entity']();
 
             $serviceInstance->testIndex(
-                output: $output,
-                entity: $entity,
+                output:     $output,
+                entity:     $entity,
                 clearIndex: $clearIndex
             );
         }

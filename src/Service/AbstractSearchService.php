@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Jield\Search\Service;
 
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Order;
 use Doctrine\ORM\EntityManager;
 use Jield\Search\Document\DocumentHelperInterface;
 use Jield\Search\Entity\HasSearchInterface;
@@ -152,6 +153,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
         OutputInterface $output,
         HasSearchInterface $entity,
         bool $clearIndex = false,
+        bool $shallow = false,
         int $limit = 50,
         array $criteria = []
     ): void {
@@ -169,6 +171,12 @@ abstract class AbstractSearchService implements SearchServiceInterface
         }
 
         $amount = $this->findCount(entity: $entity::class, criteria: $criteria);
+
+        if ($shallow) {
+            $amount = min($amount, 1000);
+            $output->writeln(messages: sprintf('Shallow update of %d items', $amount));
+            $limit = 1000; //Shallow updates are done in larger chunks
+        }
 
         $output->writeln(messages: sprintf('Updating %d of %s', $amount, $entity::class));
 
@@ -342,7 +350,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
     {
         return $this->entityManager->getRepository($entity)->findBy(
             criteria: $criteria,
-            orderBy:  [],
+            orderBy:  ['id' => Order::Descending->value],
             limit:    $limit,
             offset:   $offset
         );
