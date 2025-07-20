@@ -174,11 +174,12 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
         if ($shallow) {
             $amount = min($amount, 1000);
-            $output->writeln(messages: sprintf('Shallow update of %d items', $amount));
+            $output->writeln(messages: sprintf('Shallow update of latest %d items', $amount));
             $limit = 1000; //Shallow updates are done in larger chunks
+        } else {
+            $output->writeln(messages: sprintf('Full update of %d items of %s', $amount, $entity::class));
         }
 
-        $output->writeln(messages: sprintf('Updating %d of %s', $amount, $entity::class));
 
         $i     = 0;
         $total = 1;
