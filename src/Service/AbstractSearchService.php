@@ -265,7 +265,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
             return;
         }
 
-        $searchIndexIds = $this->findAllIdsFromSearchIndex();
+        $searchIndexIds = $this->findAllIdsFromSearchIndex(entity: $entity);
 
         $toBeDeletedItemsInSearchIndex = array_diff($searchIndexIds, $databaseIds);
 
@@ -295,7 +295,12 @@ abstract class AbstractSearchService implements SearchServiceInterface
         $this->getSolrClient()->update(query: $update);
     }
 
-    protected function findAllIdsFromSearchIndex(): array
+    /**
+     * This function must have an argument so child classes can override it
+     * @param HasSearchInterface|null $entity
+     * @return array
+     */
+    protected function findAllIdsFromSearchIndex(?HasSearchInterface $entity = null): array
     {
         //Get all ids from the index
         $query = $this->getSolrClient()->createSelect();
@@ -408,7 +413,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
             return;
         }
 
-        $searchIndexIds = $this->findAllIdsFromSearchIndex();
+        $searchIndexIds = $this->findAllIdsFromSearchIndex(entity: $entity);
 
         $toBeAddedItemsInSearchIndex = array_diff($databaseIds, $searchIndexIds);
 
