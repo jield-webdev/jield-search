@@ -1,18 +1,22 @@
-<?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true" convertWarningsToExceptions="true" verbose="true" stopOnFailure="false"
-         processIsolation="false" backupGlobals="false"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.2/phpunit.xsd">
-    <coverage>
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         colors="true" stopOnFailure="false"
+         processIsolation="false"
+         backupGlobals="false"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.0/phpunit.xsd"
+         cacheDirectory=".phpunit.cache">
+    <php>
+        <ini name="memory_limit" value="2G"/>
+    </php>
+    <testsuites>
+        <testsuite name="Jield/Search">
+            <directory>./test</directory>
+        </testsuite>
+    </testsuites>
+    <source>
         <include>
             <directory suffix=".php">./src</directory>
         </include>
-        <report>
-            <text outputFile="php://stdout" showUncoveredFiles="false"/>
-        </report>
-    </coverage>
-    <testsuite name="jield-webdev/jield-search">
-        <directory>./test</directory>
-    </testsuite>
-    <logging/>
+    </source>
 </phpunit>
