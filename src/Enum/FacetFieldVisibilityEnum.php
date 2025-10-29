@@ -2,9 +2,9 @@
 
 namespace Jield\Search\Enum;
 
-enum FacetFieldVisibilityEnum
+enum FacetFieldVisibilityEnum: string
 {
-    case FILTER_BAR;
-    case FILTER_COLUMN;
-    case FILTER_BOTH;
+    case FILTER_BAR = 'filter_bar';
+    case FILTER_COLUMN = 'filter_column';
+    case FILTER_BOTH = 'filter_both';
 }
