@@ -13,7 +13,6 @@ use Laminas\Form\Fieldset;
 use Laminas\InputFilter\InputFilterProviderInterface;
 use RuntimeException;
 use Solarium\Component\Result\Facet\FacetResultInterface;
-
 use function array_reverse;
 use function count;
 use function http_build_query;
@@ -23,10 +22,11 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
 {
     public function __construct(
         private readonly AbstractSearchService $searchService,
-        array $fields = [],
-        string $method = 'get',
-        bool $hasDateInterval = false
-    ) {
+        array                                  $fields = [],
+        string                                 $method = 'get',
+        bool                                   $hasDateInterval = false
+    )
+    {
         parent::__construct();
 
         $this->setAttribute(key: 'method', value: $method);
@@ -72,6 +72,8 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
 
         foreach ($this->searchService->getFacets() as $facetField) {
             $facetElementFieldset = new Fieldset(name: $facetField->getField());
+            $facetElementFieldset->setOption(key: 'visibility', value: $facetField->getvisibility());
+
             $field                = $this->getFacetByFacetField(fieldName: $facetField->getField());
 
             if ($facetField->getHasYesNo()) {
@@ -120,8 +122,9 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
 
     private function createFacetFieldFormElement(
         FacetResultInterface $field,
-        FacetField $facetField
-    ): MultiCheckbox {
+        FacetField           $facetField
+    ): MultiCheckbox
+    {
         $multiOptions = [];
         foreach ($field as $key => $value) {
             $multiOptions[$key] = sprintf('%s <small class="text-muted">(%s)</small>', $key, $value);

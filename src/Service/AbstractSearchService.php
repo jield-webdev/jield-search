@@ -23,15 +23,14 @@ use Solarium\QueryType\Update\Result;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Webmozart\Assert\Assert;
-
 use function defined;
 use function sprintf;
 
 abstract class AbstractSearchService implements SearchServiceInterface
 {
-    final public const string DATE_SOLR        = 'Y-m-d\TH:i:s\Z';
+    final public const string DATE_SOLR = 'Y-m-d\TH:i:s\Z';
     final public const int    QUERY_TERM_BOOST = 30;
-    public const string       SOLR_CONNECTION  = 'default';
+    public const string       SOLR_CONNECTION = 'default';
 
     protected ?Client $solrClient = null;
 
@@ -115,13 +114,13 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
     protected function getSearchDocumentFromEntity(
         \Solarium\QueryType\Update\Query\Query $update,
-        HasSearchInterface $entity
-    ): DocumentInterface {
+        HasSearchInterface                     $entity
+    ): DocumentInterface
+    {
         //We need the helper to create the document for search
         if (!$this->container->has($entity->getSearchDocumentClass())) {
             throw new RuntimeException(
-                message: 'No search document helper (' . $entity->getSearchDocumentClass(
-                       ) . ') registered for ' . $entity::class . ', did you register it in the service manager?'
+                message: 'No search document helper (' . $entity->getSearchDocumentClass() . ') registered for ' . $entity::class . ', did you register it in the service manager?'
             );
         }
 
@@ -150,13 +149,14 @@ abstract class AbstractSearchService implements SearchServiceInterface
     }
 
     public function updateCollection(
-        OutputInterface $output,
+        OutputInterface    $output,
         HasSearchInterface $entity,
-        bool $clearIndex = false,
-        bool $shallow = false,
-        int $limit = 50,
-        array $criteria = []
-    ): void {
+        bool               $clearIndex = false,
+        bool               $shallow = false,
+        int                $limit = 50,
+        array              $criteria = []
+    ): void
+    {
         $output->writeln(messages: '');
         $output->writeln(messages: sprintf('<info>%s</info>', $entity::class));
 
@@ -214,9 +214,9 @@ abstract class AbstractSearchService implements SearchServiceInterface
         if ($amount > 0) {
             $output->write(
                 messages: ' <info>(' . number_format(
-                            num: (($total - 1) / $amount * 100),
-                            decimals: 0
-                        ) . ' %)</info>'
+                    num: (($total - 1) / $amount * 100),
+                    decimals: 0
+                ) . ' %)</info>'
             );
         }
 
@@ -250,18 +250,19 @@ abstract class AbstractSearchService implements SearchServiceInterface
     }
 
     protected function removeDeletedItemsFromIndex(
-        OutputInterface $output,
+        OutputInterface    $output,
         HasSearchInterface $entity,
-        array $criteria = []
-    ): void {
+        array              $criteria = []
+    ): void
+    {
         $databaseIds = $this->findAllIdsFromDatabase(entity: $entity, criteria: $criteria);
 
         if (count($databaseIds) > 50000) {
             $output->writeln(
                 messages: sprintf(
-                              '<error>Too many items to check (%d), please use the update command</error>',
-                              count($databaseIds)
-                          )
+                    '<error>Too many items to check (%d), please use the update command</error>',
+                    count($databaseIds)
+                )
             );
             return;
         }
@@ -281,10 +282,10 @@ abstract class AbstractSearchService implements SearchServiceInterface
             $update->addDeleteById(id: $entity->getResourceId());
             $output->writeln(
                 messages: sprintf(
-                              '<comment>Id %d of %s has been deleted</comment>',
-                              $remainderId,
-                              $entity::class
-                          )
+                    '<comment>Id %d of %s has been deleted</comment>',
+                    $remainderId,
+                    $entity::class
+                )
             );
         }
 
@@ -356,9 +357,9 @@ abstract class AbstractSearchService implements SearchServiceInterface
     {
         return $this->entityManager->getRepository($entity)->findBy(
             criteria: $criteria,
-            orderBy:  ['id' => Order::Descending->value],
-            limit:    $limit,
-            offset:   $offset
+            orderBy: ['id' => Order::Descending->value],
+            limit: $limit,
+            offset: $offset
         );
     }
 
@@ -374,9 +375,9 @@ abstract class AbstractSearchService implements SearchServiceInterface
                 if (isset($response->responseHeader)) {
                     $output->writeln(
                         messages: sprintf(
-                                      "<error>Solr HTTP response code: %s</error>",
-                                      $response->responseHeader->status
-                                  )
+                            "<error>Solr HTTP response code: %s</error>",
+                            $response->responseHeader->status
+                        )
                     );
                 }
                 if (isset($response->error)) {
@@ -398,18 +399,19 @@ abstract class AbstractSearchService implements SearchServiceInterface
     }
 
     private function addMissingItemsToTheIndex(
-        OutputInterface $output,
+        OutputInterface    $output,
         HasSearchInterface $entity,
-        array $criteria = []
-    ): void {
+        array              $criteria = []
+    ): void
+    {
         $databaseIds = $this->findAllIdsFromDatabase(entity: $entity, criteria: $criteria);
 
         if (count($databaseIds) > 50000) {
             $output->writeln(
                 messages: sprintf(
-                              '<error>Too many items to check (%d), please use the update command</error>',
-                              count($databaseIds)
-                          )
+                    '<error>Too many items to check (%d), please use the update command</error>',
+                    count($databaseIds)
+                )
             );
             return;
         }
@@ -421,10 +423,10 @@ abstract class AbstractSearchService implements SearchServiceInterface
         if (count($toBeAddedItemsInSearchIndex) > 200) {
             $output->writeln(
                 messages: sprintf(
-                              '<error>%d items of %s will be added which is more than the threshold of 200 items, use a sync instead</error>',
-                              count($toBeAddedItemsInSearchIndex),
-                              $entity::class
-                          )
+                    '<error>%d items of %s will be added which is more than the threshold of 200 items, use a sync instead</error>',
+                    count($toBeAddedItemsInSearchIndex),
+                    $entity::class
+                )
             );
 
             return;
@@ -463,10 +465,10 @@ abstract class AbstractSearchService implements SearchServiceInterface
     {
         $this->query->addFilterQuery(
             filterQuery: [
-                             'key'   => $key,
-                             'query' => $key . ':(' . $value . ')',
-                             'tag'   => $key,
-                         ]
+                'key'   => $key,
+                'query' => $key . ':(' . $value . ')',
+                'tag'   => $key,
+            ]
         );
     }
 
@@ -490,6 +492,9 @@ abstract class AbstractSearchService implements SearchServiceInterface
         return $this;
     }
 
+    /**
+     * @return FacetField[]
+     */
     public function getFacets(): array
     {
         return $this->facets;
@@ -509,11 +514,11 @@ abstract class AbstractSearchService implements SearchServiceInterface
             if (isset($facet['andOr']) && $facet['andOr'] === 'and') {
                 foreach ($facet['values'] as $value) {
                     $this->addFilterQueryFromFacet(
-                        key:     $key++,
-                        field:   $field,
-                        value:   $value,
+                        key: $key++,
+                        field: $field,
+                        value: $value,
                         exclude: isset($facet['yesNo']) && $facet['yesNo'] === 'no',
-                        and:     true,
+                        and: true,
                     );
                 }
             }
@@ -521,9 +526,9 @@ abstract class AbstractSearchService implements SearchServiceInterface
             //An or is just to put all values in the result
             if (!isset($facet['andOr'])) {
                 $this->addFilterQueryFromFacet(
-                    key:     $key++,
-                    field:   $field,
-                    value:   $facet['values'],
+                    key: $key++,
+                    field: $field,
+                    value: $facet['values'],
                     exclude: isset($facet['yesNo']) && $facet['yesNo'] === 'no'
                 );
             }
@@ -531,12 +536,13 @@ abstract class AbstractSearchService implements SearchServiceInterface
     }
 
     private function addFilterQueryFromFacet(
-        int $key,
-        string $field,
+        int              $key,
+        string           $field,
         string|array|int $value,
-        bool $exclude = false,
-        bool $and = false,
-    ): void {
+        bool             $exclude = false,
+        bool             $and = false,
+    ): void
+    {
         $facetField = $this->getFacet($field);
 
         switch (true) {
@@ -612,8 +618,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
         //Grab an array with all ids from the database
         $qb     = $this->entityManager->createQueryBuilder();
-        $result = $qb->select('e')->from(from: $entity::class, alias: 'e')->setMaxResults(maxResults: 1)->getQuery(
-        )->getResult();
+        $result = $qb->select('e')->from(from: $entity::class, alias: 'e')->setMaxResults(maxResults: 1)->getQuery()->getResult();
 
         $update = $this->getSolrClient()->createUpdate();
 
@@ -647,10 +652,10 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
             $output->writeln(
                 messages: sprintf(
-                              '<error>Error updating %s: %s</error>',
-                              $entity::class,
-                              $response->error->msg
-                          )
+                    '<error>Error updating %s: %s</error>',
+                    $entity::class,
+                    $response->error->msg
+                )
             );
         }
     }

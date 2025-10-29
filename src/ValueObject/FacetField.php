@@ -5,28 +5,32 @@ declare(strict_types=1);
 namespace Jield\Search\ValueObject;
 
 use JetBrains\PhpStorm\Pure;
+use Jield\Search\Enum\FacetFieldVisibilityEnum;
 
 final class FacetField
 {
-    public const TYPE_CHECKBOX = 1;
-    public const TYPE_SLIDER = 2;
-    public const TYPE_CHECKBOX_MIN = 3;
+    public const int TYPE_CHECKBOX = 1;
+    public const int TYPE_SLIDER = 2;
+    public const int TYPE_CHECKBOX_MIN = 3;
 
     public function __construct(
-        private readonly string $field,
-        private readonly string $name,
-        private readonly int $type = self::TYPE_CHECKBOX,
-        private readonly int $minCount = 1,
-        private string $sort = 'index', //or count
-        private readonly bool $reverse = false,
-        private readonly bool $hasYesNo = false,
-        private readonly bool $hasAndOr = false,
-        private readonly ?string $defaultValue = null,
-        private readonly int $limit = 100
-    ) {
+        private readonly string                   $field,
+        private readonly string                   $name,
+        private readonly int                      $type = self::TYPE_CHECKBOX,
+        private readonly int                      $minCount = 1,
+        private string                            $sort = 'index', //or count
+        private readonly bool                     $reverse = false,
+        private readonly bool                     $hasYesNo = false,
+        private readonly bool                     $hasAndOr = false,
+        private readonly ?string                  $defaultValue = null,
+        private readonly int                      $limit = 100,
+        private readonly FacetFieldVisibilityEnum $visibility = FacetFieldVisibilityEnum::FILTER_BOTH
+    )
+    {
     }
 
-    #[Pure] public static function fromArray(array $params): FacetField
+    #[Pure]
+    public static function fromArray(array $params): FacetField
     {
         return new self(
             field: $params['field'] ?? '',
@@ -38,7 +42,8 @@ final class FacetField
             hasYesNo: $params['hasYesNo'] ?? false,
             hasAndOr: $params['hasAndOr'] ?? false,
             defaultValue: $params['defaultValue'] ?? false,
-            limit: $params['limit'] ?? 100
+            limit: $params['limit'] ?? 100,
+            visibility: $params['visibility'] ?? FacetFieldVisibilityEnum::FILTER_BOTH
         );
     }
 
@@ -106,5 +111,10 @@ final class FacetField
     public function getLimit(): int
     {
         return $this->limit;
+    }
+
+    public function getVisibility(): FacetFieldVisibilityEnum
+    {
+        return $this->visibility;
     }
 }
