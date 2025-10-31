@@ -26,7 +26,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         array                                  $fields = [],
         string                                 $method = 'get',
         bool                                   $hasDateInterval = false,
-        FacetFieldVisibilityEnum               $facetFieldVisibilityEnum = FacetFieldVisibilityEnum::FILTER_BOTH
+        FacetFieldVisibilityEnum               $facetFieldVisibilityEnum = FacetFieldVisibilityEnum::FILTER_COLUMN
     )
     {
         parent::__construct();

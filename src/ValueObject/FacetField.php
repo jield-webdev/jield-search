@@ -24,7 +24,7 @@ final class FacetField
         private readonly bool                     $hasAndOr = false,
         private readonly ?string                  $defaultValue = null,
         private readonly int                      $limit = 100,
-        private readonly FacetFieldVisibilityEnum $visibility = FacetFieldVisibilityEnum::FILTER_BOTH
+        private readonly FacetFieldVisibilityEnum $visibility = FacetFieldVisibilityEnum::FILTER_COLUMN
     )
     {
     }
@@ -43,7 +43,7 @@ final class FacetField
             hasAndOr: $params['hasAndOr'] ?? false,
             defaultValue: $params['defaultValue'] ?? false,
             limit: $params['limit'] ?? 100,
-            visibility: $params['visibility'] ?? FacetFieldVisibilityEnum::FILTER_BOTH
+            visibility: $params['visibility'] ?? FacetFieldVisibilityEnum::FILTER_COLUMN
         );
     }
 
