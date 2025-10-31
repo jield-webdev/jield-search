@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Jield\Search\Form;
 
+use Jield\Search\Enum\FacetFieldVisibilityEnum;
 use Jield\Search\Service\AbstractSearchService;
 use Jield\Search\ValueObject\FacetField;
 use Laminas\Form\Element\Checkbox;
@@ -24,7 +25,8 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         private readonly AbstractSearchService $searchService,
         array                                  $fields = [],
         string                                 $method = 'get',
-        bool                                   $hasDateInterval = false
+        bool                                   $hasDateInterval = false,
+        FacetFieldVisibilityEnum               $facetFieldVisibilityEnum = FacetFieldVisibilityEnum::FILTER_BOTH
     )
     {
         parent::__construct();
@@ -40,6 +42,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
                     'options' => [
                         'is-date-range' => true,
                         'label'         => 'Date interval',
+                        'visibility'    => $facetFieldVisibilityEnum,
                     ],
                 ]
             );
@@ -57,6 +60,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
                         'options' => [
                             'label'         => $key,
                             'value_options' => $values,
+                            'visibility'    => $facetFieldVisibilityEnum,
                         ],
                     ]
                 );
@@ -74,7 +78,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
             $facetElementFieldset = new Fieldset(name: $facetField->getField());
             $facetElementFieldset->setOption(key: 'visibility', value: $facetField->getvisibility());
 
-            $field                = $this->getFacetByFacetField(fieldName: $facetField->getField());
+            $field = $this->getFacetByFacetField(fieldName: $facetField->getField());
 
             if ($facetField->getHasYesNo()) {
                 $facetElementFieldset->add(elementOrFieldset: $this->createYesNoFormElement());
