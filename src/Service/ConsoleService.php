@@ -9,7 +9,6 @@ use Jield\Search\Entity\HasSearchInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozart\Assert\Assert;
-
 use function sprintf;
 
 class ConsoleService
@@ -34,10 +33,11 @@ class ConsoleService
 
     public function resetIndex(
         OutputInterface $output,
-        string $index,
-        bool $clearIndex = false,
-        bool $shallow = false
-    ): void {
+        string          $index,
+        bool            $clearIndex = false,
+        bool            $shallow = false
+    ): void
+    {
         if ($index === 'all') {
             foreach ($this->services as $service) {
                 /** @var AbstractSearchService $serviceInstance */
@@ -49,12 +49,12 @@ class ConsoleService
                 $criteria = $service['criteria'] ?? [];
 
                 $serviceInstance->updateCollection(
-                    output:     $output,
-                    entity:     $entity,
+                    output: $output,
+                    entity: $entity,
                     clearIndex: $clearIndex,
-                    shallow:    $shallow,
-                    limit:      $limit,
-                    criteria:   $criteria
+                    shallow: $shallow,
+                    limit: $limit,
+                    criteria: $criteria
                 );
             }
             return;
@@ -78,28 +78,33 @@ class ConsoleService
         $criteria = $this->services[$index]['criteria'] ?? [];
 
         $serviceInstance->updateCollection(
-            output:     $output,
-            entity:     $entity,
+            output: $output,
+            entity: $entity,
             clearIndex: $clearIndex,
-            shallow:    $shallow,
-            limit:      $limit,
-            criteria:   $criteria
+            shallow: $shallow,
+            limit: $limit,
+            criteria: $criteria
         );
     }
 
     public function syncIndex(OutputInterface $output): void
     {
         foreach ($this->services as $service) {
+            if ($service['skip_sync'] ?? false) {
+                $output->writeln(messages: '');
+                $output->writeln(messages: sprintf('<comment>Skipping sync for %s</comment>', $service['service']));
+                continue;
+            }
+
             /** @var AbstractSearchService $serviceInstance */
             $serviceInstance = $this->container->get($service['service']);
             /** @var HasSearchInterface $entity */
-            $entity = new $service['entity']();
-
+            $entity   = new $service['entity']();
             $criteria = $service['criteria'] ?? [];
 
             $serviceInstance->syncIndex(
-                output:   $output,
-                entity:   $entity,
+                output: $output,
+                entity: $entity,
                 criteria: $criteria
             );
         }
@@ -114,8 +119,8 @@ class ConsoleService
             $entity = new $service['entity']();
 
             $serviceInstance->testIndex(
-                output:     $output,
-                entity:     $entity,
+                output: $output,
+                entity: $entity,
                 clearIndex: $clearIndex
             );
         }
