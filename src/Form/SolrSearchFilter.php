@@ -185,6 +185,12 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         }
 
         foreach ($this->data['facet'] as $facetName => $facetData) {
+
+            //We need to check if the facet is actually a facet field
+            if (!$this->searchService->hasFacet(fieldName: $facetName)) {
+                continue;
+            }
+
             $facetField = $this->searchService->getFacet(fieldName: $facetName);
 
             $values = $facetData['values'] ?? [];

@@ -595,6 +595,11 @@ abstract class AbstractSearchService implements SearchServiceInterface
         return $this->facets[$fieldName];
     }
 
+    public function hasFacet(string $fieldName): bool
+    {
+        return isset($this->facets[$fieldName]);
+    }
+
     public function testIndex(OutputInterface $output, HasSearchInterface $entity, bool $clearIndex): void
     {
         $output->writeln(messages: '');
