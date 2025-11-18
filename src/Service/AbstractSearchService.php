@@ -543,6 +543,10 @@ abstract class AbstractSearchService implements SearchServiceInterface
         bool             $and = false,
     ): void
     {
+        if (!$this->hasFacet($field)) {
+            return;
+        }
+
         $facetField = $this->getFacet($field);
 
         switch (true) {
