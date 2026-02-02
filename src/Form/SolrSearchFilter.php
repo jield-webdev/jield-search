@@ -178,10 +178,48 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
                 'query'          => $this->data['query'],
                 'facetArguments' => http_build_query(
                     data: [
-                        'facet' => $this->data['facet'],
+                        'facet'        => $this->data['facet'],
+                        'filter'       => $this->data['filter'],
+                        'dateInterval' => $this->data['dateInterval'] ?? null,
+                        'query'        => '',
                     ]
                 ),
             ];
+        }
+
+        if (!empty($this->data['dateInterval'])) {
+            $badges[] = [
+                'type'           => 'dateInterval',
+                'value'          => $this->data['dateInterval'],
+                'facetArguments' => http_build_query(
+                    data: [
+                        'facet'  => $this->data['facet'],
+                        'filter' => $this->data['filter'],
+                        'query'  => '',
+                    ]
+                ),
+            ];
+        }
+
+        if (!empty($this->data['filter']['general'])) {
+            $selectedValues = $this->data['filter']['general'];
+            foreach ($selectedValues as $value) {
+                $remainingValues = array_diff($selectedValues, [$value]);
+                $badges[]        = [
+                    'type'           => 'general',
+                    'value'          => $value,
+                    'facetArguments' => http_build_query(
+                        data: [
+                            'query'        => $this->data['query'],
+                            'facet'        => $this->data['facet'],
+                            'dateInterval' => $this->data['dateInterval'] ?? null,
+                            'filter'       => [
+                                'general' => $remainingValues,
+                            ]
+                        ]
+                    ),
+                ];
+            }
         }
 
         foreach ($this->data['facet'] as $facetName => $facetData) {
@@ -221,8 +259,10 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
                 'not'            => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
                 'facetArguments' => http_build_query(
                     data: [
-                        'query' => $this->data['query'],
-                        'facet' => $remainingFacets,
+                        'query'        => $this->data['query'],
+                        'dateInterval' => $this->data['dateInterval'] ?? null,
+                        'facet'        => $remainingFacets,
+                        'filter'       => $this->data['filter'],
                     ]
                 ),
             ];
