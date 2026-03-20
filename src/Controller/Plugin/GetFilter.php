@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Jield\Search\Controller\Plugin;
 
-use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Order;
 use JetBrains\PhpStorm\Pure;
 use Jield\Search\ValueObject\DateInterval;
 use Jield\Search\ValueObject\SearchFormResult;
@@ -13,7 +13,6 @@ use Laminas\Mvc\Application;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Laminas\Stdlib\RequestInterface;
 use Psr\Container\ContainerInterface;
-
 use function http_build_query;
 use function urldecode;
 use function urlencode;
@@ -50,7 +49,7 @@ class GetFilter extends AbstractPlugin
         //Initiate the filter
         $this->filter = new SearchFormResult(
             order: $request->getQuery(name: 'order', default: 'default'),
-            direction: $request->getQuery(name: 'direction', default: Criteria::ASC)
+            direction: $request->getQuery(name: 'direction', default: Order::Ascending->value),
         );
 
         if (!empty($encodedFilter)) {
@@ -60,7 +59,7 @@ class GetFilter extends AbstractPlugin
         // If the form is submitted, refresh the URL
         if ($request->getQuery(name: 'query') !== null) {
             $this->filter->setQuery(query: $request->getQuery(name: 'query'));
-            $this->filter->setFilter(filter: $request->getQuery(name: 'filter', default: []));
+            $this->filter->setFilter(filter: (array)$request->getQuery(name: 'filter', default: []));
         }
 
         if (null !== $request->getQuery(name: 'facet')) {
@@ -84,14 +83,14 @@ class GetFilter extends AbstractPlugin
         if ($request->getQuery(name: 'reset') !== null) {
             $this->filter = new SearchFormResult(
                 order: $request->getQuery(name: 'order', default: 'default'),
-                direction: $request->getQuery(name: 'direction', default: Criteria::ASC)
+                direction: $request->getQuery(name: 'direction', default: Order::Ascending->value)
             );
         }
 
         if ($this->request->isPost()) {
             $this->filter = new SearchFormResult(
                 order: $this->request->getQuery(name: 'order', default: 'default'),
-                direction: $this->request->getQuery(name: 'direction', default: Criteria::ASC),
+                direction: $this->request->getQuery(name: 'direction', default: Order::Ascending->value),
                 query: $this->request->getPost(name: 'query'),
                 filter: $this->request->getPost(name: 'filter', default: []),
                 facet: $this->request->getPost(name: 'facet', default: []),
@@ -107,22 +106,26 @@ class GetFilter extends AbstractPlugin
         return $this->filter;
     }
 
-    #[Pure] public function getOrder(): string
+    #[Pure]
+    public function getOrder(): string
     {
         return $this->filter->getOrder();
     }
 
-    #[Pure] public function getDirection(): string
+    #[Pure]
+    public function getDirection(): string
     {
         return $this->filter->getDirection();
     }
 
-    #[Pure] public function getQuery(): ?string
+    #[Pure]
+    public function getQuery(): ?string
     {
         return $this->filter->getQuery();
     }
 
-    #[Pure] public function getFacet(): array
+    #[Pure]
+    public function getFacet(): array
     {
         return $this->filter->getFacet();
     }
