@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Jield\Search\ValueObject;
 
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Collections\Order;
 use function array_key_exists;
 use function base64_decode;
@@ -187,11 +186,11 @@ final class SearchFormResult
         if (
             !in_array(
                 needle: $direction,
-                haystack: [Criteria::ASC, Criteria::DESC],
+                haystack: [Order::Ascending->value, Order::Descending->value],
                 strict: true
             )
         ) {
-            return Criteria::DESC;
+            return Order::Descending->value;
         }
 
         return $direction;
