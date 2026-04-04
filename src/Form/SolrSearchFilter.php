@@ -173,31 +173,35 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         $badges = [];
 
         if (!empty($this->data['query'])) {
+
+            $data = [
+                'facet'        => $this->data['facet'],
+                'filter'       => $this->data['filter'],
+                'dateInterval' => $this->data['dateInterval'] ?? null,
+                'query'        => '',
+            ];
+
             $badges[] = [
-                'type'           => 'search',
-                'query'          => $this->data['query'],
-                'facetArguments' => http_build_query(
-                    data: [
-                        'facet'        => $this->data['facet'],
-                        'filter'       => $this->data['filter'],
-                        'dateInterval' => $this->data['dateInterval'] ?? null,
-                        'query'        => '',
-                    ]
-                ),
+                'type'               => 'search',
+                'query'              => $this->data['query'],
+                'facetArguments'     => http_build_query(data: $data),
+                'resetEncodedFilter' => base64_encode(string: json_encode(value: $data)),
             ];
         }
 
         if (!empty($this->data['dateInterval'])) {
+
+            $data = [
+                'facet'  => $this->data['facet'],
+                'filter' => $this->data['filter'],
+                'query'  => '',
+            ];
+
             $badges[] = [
-                'type'           => 'dateInterval',
-                'value'          => $this->data['dateInterval'],
-                'facetArguments' => http_build_query(
-                    data: [
-                        'facet'  => $this->data['facet'],
-                        'filter' => $this->data['filter'],
-                        'query'  => '',
-                    ]
-                ),
+                'type'               => 'dateInterval',
+                'value'              => $this->data['dateInterval'],
+                'facetArguments'     => http_build_query($data),
+                'resetEncodedFilter' => base64_encode(string: json_encode(value: $data)),
             ];
         }
 
@@ -205,19 +209,24 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
             $selectedValues = $this->data['filter']['general'];
             foreach ($selectedValues as $value) {
                 $remainingValues = array_diff($selectedValues, [$value]);
-                $badges[]        = [
-                    'type'           => 'general',
-                    'value'          => $value,
-                    'facetArguments' => http_build_query(
-                        data: [
-                            'query'        => $this->data['query'],
-                            'facet'        => $this->data['facet'],
-                            'dateInterval' => $this->data['dateInterval'] ?? null,
-                            'filter'       => [
-                                'general' => $remainingValues,
-                            ]
-                        ]
-                    ),
+
+                $data = [
+                    'facet'  => $this->data['facet'],
+                    'filter' => [
+                        'general' => $remainingValues,
+                    ],
+                    'query'  => $this->data['query'],
+                ];
+
+                if (!empty($this->data['dateInterval'])) {
+                    $data['dateInterval'] = $this->data['dateInterval'];
+                }
+
+                $badges[] = [
+                    'type'               => 'general',
+                    'value'              => $value,
+                    'facetArguments'     => http_build_query($data),
+                    'resetEncodedFilter' => base64_encode(string: json_encode(value: $data)),
                 ];
             }
         }
@@ -250,21 +259,25 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
 
             unset($remainingFacets[$facetName]);
 
+            $data = [
+                'query'  => $this->data['query'],
+                'facet'  => $remainingFacets,
+                'filter' => $this->data['filter'],
+            ];
+
+            if (!empty($this->data['dateInterval'])) {
+                $data['dateInterval'] = $this->data['dateInterval'];
+            }
+
             $badges[] = [
-                'type'           => 'facet',
-                'facetField'     => $facetField,
-                'name'           => $facetField->getName(),
-                'values'         => $valueText,
-                'hasValues'      => (is_countable(value: $values) ? count($values) : 0) > 0,
-                'not'            => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
-                'facetArguments' => http_build_query(
-                    data: [
-                        'query'        => $this->data['query'],
-                        'dateInterval' => $this->data['dateInterval'] ?? null,
-                        'facet'        => $remainingFacets,
-                        'filter'       => $this->data['filter'],
-                    ]
-                ),
+                'type'               => 'facet',
+                'facetField'         => $facetField,
+                'name'               => $facetField->getName(),
+                'values'             => $valueText,
+                'hasValues'          => (is_countable(value: $values) ? count($values) : 0) > 0,
+                'not'                => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
+                'facetArguments'     => http_build_query($data),
+                'resetEncodedFilter' => base64_encode(string: json_encode($data, JSON_THROW_ON_ERROR)),
             ];
         }
 
