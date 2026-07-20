@@ -62,7 +62,7 @@ class GetFilter extends AbstractPlugin
             $this->filter->setFilter(filter: (array)$request->getQuery(name: 'filter', default: []));
         }
 
-        if (null !== $request->getQuery(name: 'facet')) {
+        if (null !== $request->getQuery(name: 'facet') && is_array($request->getQuery(name: 'facet'))) {
             $this->filter->setFacet(facet: $request->getQuery(name: 'facet'));
         }
 
